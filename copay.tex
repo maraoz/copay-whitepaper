@@ -1,5 +1,7 @@
 \documentclass{article}
 \usepackage{amsmath, amsthm, amssymb}
+\usepackage{hyperref}
+
 \begin{document}
 \pagestyle{headings}
 \title{Copay: A Multisignature Bitcoin Wallet}
@@ -30,15 +32,15 @@ For this to be possible, we make use of many modern technologies:
 \section{Introduction}
 
 Although the bitcoin protocol itself is cryptographically secure, individual users or companies may not be secure.
-Normal pubkeyhash transactions require only one signature, which in turn requires only one private key.
+Normal pubkeyhash transactions \cite{bwpkh} require only one signature, which in turn requires only one private key.
 If this private key or if the entire wallet of private keys is revealed to an attacker due to weak security from the user, then the user's bitcoins can be stolen.
 
 Multisignature transactions offer a solution to this problem by requiring multiple signatures per transaction.
 Each signature requires a different private key, which can all be stored on different devices in different places.
 This reduces the probability that the bitcoins can be stolen, since not just one, but multiple devices must be compromised.
 
-Multisignature transactions have been possible in bitcoin since the genesis block with the OP\_CHECKMULTISIG operation. Multisignature transactions became standard on [TODO: insert date], meaning they are relayed by default by the reference client.
-In order to make advanced transactions more accessible, pay-to-script-hash (P2SH) transactions were introduced on [TODO: insert date].
+Multisignature transactions have always been possible in bitcoin with the OP\_CHECKMULTISIG \cite{bip11} operation. Multisignature transactions became standard on 30 March 2012\cite{bc0.6.0} after Bitcoin-Qt version 0.6.0 was released, meaning they are relayed by default by the reference client since then.
+In order to make advanced transactions more accessible, pay-to-script-hash (P2SH)\cite{bip16} transactions were introduced on [TODO: insert date].
 P2SH transactions allow a serialized script, the redeemScript, to be inserted into the scriptSig which is executed after the scriptPubKey.
 The redeemScript can be any one of the standard scriptPubKeys, including a multisignature scriptPubKey.
 In effect this means it is possible to pay to an address that requires multiple signatures to spend.
@@ -50,14 +52,14 @@ To do this we introduce the notion of an M-of-N wallet which is shared amongst N
 What is shared amongst the N copayers are the public keys and addresses of the other copayers, but the private keys of each copayer remains private.
 
 In most bitcoin wallets, addresses are computed from randomly generated private keys.
-In order to make backups easier and to make sharing public keys easier, we use BIP32 hierarchical deterministic keys [TODO: reference], which allows each copayer to generate a single master extended private key that needs to be backed up only once.
+In order to make backups easier and to make sharing public keys easier, we use BIP32 hierarchical deterministic keys \cite{bip32}, which allows each copayer to generate a single master extended private key that needs to be backed up only once.
 The copayers then share the extended public keys with the other copayers, and any copayer can generate new addresses for receiving bitcoins at any time.
 Creating new addresses does not require any further sharing of public keys, since all copayers can generate the public keys of all other copayers.
 
 When a copayer wishes to send bitcoins, they produce a transaction proposal, the inputs of which consist of unspent outputs from the wallet that must be signed by M copayers.
 This transaction proposal contains the signature of the author, but not yet the signatures of any of the other copayers.
 The other copayers see the transaction proposal displayed in their screen, and they can choose either to sign the transaction proposal, or to reject it.
-As soon as the transaction reaches all M signatures, it is broadcast to the bitcoin network and should soon be mined into a block.
+As soon as the transaction reaches all M signatures, it is broadcast to the bitcoin network and should soon be confirmed (mined into a block).
 
 \section{Multisignature Transactions}
 
@@ -104,5 +106,30 @@ Modern web browsers allow each domain to store up to 5 MB in localStorage. This 
 \subsection{Privacy}
 
 \section{Conclusion}
+
+
+\begin{thebibliography}{9}
+
+\bibitem{bwpkh}
+  \url{https://en.bitcoin.it/wiki/Transactions#Pay-to-PubkeyHash}
+  \emph{Pay-to-PubkeyHash}.
+
+\bibitem{bip11}
+  \url{https://github.com/bitcoin/bips/blob/master/bip-0011.mediawiki}
+  \emph{BIP-0011}
+
+\bibitem{bc0.6.0}
+  \url{https://bitcoin.org/en/release/v0.6.0}
+  \emph{Bitcoin-Qt version 0.6.0 released}
+
+\bibitem{bip16}
+  \url{https://github.com/bitcoin/bips/blob/master/bip-0016.mediawiki}
+  \emph{BIP-0016}
+
+\bibitem{bip32}
+  \url{https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki}
+  \emph{BIP-0032}
+
+\end{thebibliography}
 
 \end{document}
