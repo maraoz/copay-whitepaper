@@ -75,17 +75,43 @@ Modern web browsers allow each domain to store up to 5 MB in localStorage. This 
 
 \subsection{Introduction of BIP32}
 
-[TODO: brief description of BIP32 itself]
+BIP32 \cite{bip32} is a specification for hierarchical deterministic bitcoin wallets.
+It's based on the fact that elliptic curve points have mathematic properties that allow deterministic derivation of one from another.
+This means that given a bitcoin private key, you can apply a derivation function, and obtain a new bitcoin private key, and applying a similar derivation, obtain a new public key from the public key corresponding to the original private key.
+This has many desireable consequences, like reducing communication between parties that need to share multiple bitcoin addresses, and allowing easier private key secure backups (because you only need to securely store the master extended private key). 
 
 \subsection{Protocol for Addresses}
+For copay, we use P2SH addresses for all internally generated addresses (for both receive and change).
+The redeemScript is an M-of-N multisig script, using one public key for each one of the N copayers.
+Each address uses a different public key for each copayer, so no public key is ever reused.
+The main derivation structure we use is:
+\begin{verbatim}
+m / address_index / change
+\end{verbatim}
 
-[TODO: description of our protocol for generating addresses]
+\subsubsection{address\_index}
+Addresses are numbered from index 0 in sequentially increasing manner. This number is used as child index in BIP32 derivation.
+\subsubsection{change}
+Constant 0 is used for external chain and constant 1 for internal chain (also known as change addresses).
+External chain is used for addresses that are meant to be visible outside of the wallet (e.g. for receiving payments).
+Internal chain is used for addresses which are not meant to be visible outside of the wallet and is used for return transaction change.
+
+Each copayer stores the last-used index for change and receive addresses.
+When a copayer wants to generate a new receiving or change address, he increments the index, and uses that to get a derivation path.
+The copayer can independently generate the N needed public keys for that address.
+He does this by deriving the public key in each of the different trees, but using the same path.
+He can then generate the multisig script (by lexicographically sorting the public keys) and the corresponding P2SH address.
+In this way, each path corresponds to an address, but the public keys for that address come from different trees.
+
+The copayers sync the last-used index for each branch, so that they don't generate the same address twice.
+This has some problems, which can be solved via the new derivation structure we're working on \cite{bipnn}.
+
 
 \section{WebRTC P2P Connections and PeerJS}
 
 [TODO: Description of P2P connections with Web RTC and PeerJS]
 
-\section{Introduction to Web RTC P2P}
+\subsection{Introduction to Web RTC P2P}
 
 \subsection{Building a Wallet}
 
@@ -129,6 +155,10 @@ Modern web browsers allow each domain to store up to 5 MB in localStorage. This 
 \bibitem{bip32}
   \url{https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki}
   \emph{BIP-0032}
+
+\bibitem{bipnn}
+  \url{https://github.com/maraoz/bips/blob/master/bip-NNNN.mediawiki#specification}
+  \emph{Unnamed BIP Draft}
 
 \end{thebibliography}
 
